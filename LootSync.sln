@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleportRequest", "TeleportRequest\TeleportRequest.csproj", "{581A83B0-B044-4426-BFFE-1E91D1103B77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{581A83B0-B044-4426-BFFE-1E91D1103B77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{581A83B0-B044-4426-BFFE-1E91D1103B77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{581A83B0-B044-4426-BFFE-1E91D1103B77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{581A83B0-B044-4426-BFFE-1E91D1103B77}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7717B496-A96F-4BFE-9365-03E44982673F}
+	EndGlobalSection
+EndGlobal
