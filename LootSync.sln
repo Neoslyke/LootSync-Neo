@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeleportRequest", "TeleportRequest\TeleportRequest.csproj", "{581A83B0-B044-4426-BFFE-1E91D1103B77}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LootSync", "LootSync\LootSync.csproj", "{581A83B0-B044-4426-BFFE-1E91D1103B77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
