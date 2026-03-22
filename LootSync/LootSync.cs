@@ -14,8 +14,8 @@ public class Plugin : TerrariaPlugin
     public override string Description => "Player loot synchronization.";
 
     public static Configuration Config { get; private set; } = new();
-    public static Database Database { get; private set; } = null!;
-    public static bool Enabled { get; set; } = true;
+    public static Database Database { get; private set; } = new();
+    private static bool _enabled = true;
 
     public Plugin(Main game) : base(game) { }
 
@@ -82,8 +82,8 @@ public class Plugin : TerrariaPlugin
 
     private void ToggleCommand(CommandArgs args)
     {
-        Enabled = !Enabled;
-        args.Player.SendSuccessMessage($"[LootSync] Per-player loot is now {(Enabled ? "enabled" : "disabled")}.");
+        _enabled = !_enabled;
+        args.Player.SendSuccessMessage($"[LootSync] Per-player loot is now {(_enabled ? "enabled" : "disabled")}.");
     }
 
     private void AddChestCommand(CommandArgs args)
@@ -124,7 +124,7 @@ public class Plugin : TerrariaPlugin
 
     private void OnChestItemChange(object? sender, GetDataHandlers.ChestItemEventArgs e)
     {
-        if (!Enabled || !Config.Enable) return;
+        if (!_enabled || !Config.Enable) return;
 
         var realChest = Main.chest[e.ID];
         if (realChest == null || realChest.bankChest) return;
@@ -144,7 +144,7 @@ public class Plugin : TerrariaPlugin
 
     private void OnChestOpen(object? sender, GetDataHandlers.ChestOpenEventArgs e)
     {
-        if (e.Handled || !Enabled || !Config.Enable) return;
+        if (e.Handled || !_enabled || !Config.Enable) return;
 
         int chestId = Chest.FindChest(e.X, e.Y);
         if (chestId == -1) return;
@@ -159,7 +159,7 @@ public class Plugin : TerrariaPlugin
         if (Config.ShowLootMessage)
             e.Player.SendInfoMessage("[LootSync] Loot in this chest is saved per-player!");
 
-        for (int slot = 0; slot < Chest.maxItems; slot++)
+        for (int slot = 0; slot < fakeChest.item.Length; slot++)
         {
             var item = fakeChest.item[slot];
             byte[] payload = ConstructChestItemPacket(chestId, slot, item);
@@ -176,7 +176,7 @@ public class Plugin : TerrariaPlugin
 
     private void OnChestPlace(object? sender, GetDataHandlers.PlaceChestEventArgs e)
     {
-        if (!Enabled || !Config.Enable) return;
+        if (!_enabled || !Config.Enable) return;
 
         int tileX = e.TileX;
         int tileY = e.TileY - 1;
@@ -187,7 +187,7 @@ public class Plugin : TerrariaPlugin
             {
                 int chestId = Chest.FindChest(tileX, tileY);
                 if (chestId != -1)
-                    Main.chest[chestId].item = new Item[Chest.maxItems];
+                    Main.chest[chestId].item = new Item[Main.chest[chestId].item.Length];
             }
             Database.SetChestPlayerPlaced(tileX, tileY);
         }
@@ -199,23 +199,34 @@ public class Plugin : TerrariaPlugin
 
     private static byte[] ConstructChestItemPacket(int chestId, int slot, Item item)
     {
-        using var ms = new MemoryStream();
-        using var writer = new BinaryWriter(ms);
+        var memoryStream = new MemoryStream();
+        var packetWriter = new OTAPI.PacketWriter(memoryStream);
 
-        writer.BaseStream.Position = 2L;
-        writer.Write((byte)PacketTypes.ChestItem);
-        writer.Write((short)chestId);
-        writer.Write((byte)slot);
+        packetWriter.BaseStream.Position = 0L;
+        long position = packetWriter.BaseStream.Position;
 
-        short netId = (short)(item.Name == null ? 0 : item.netID);
-        writer.Write((short)item.stack);
-        writer.Write(item.prefix);
-        writer.Write(netId);
+        packetWriter.BaseStream.Position += 2L;
+        packetWriter.Write((byte)PacketTypes.ChestItem);
 
-        int length = (int)writer.BaseStream.Position;
-        writer.BaseStream.Position = 0;
-        writer.Write((ushort)length);
+        packetWriter.Write((short)chestId);
+        packetWriter.Write((byte)slot);
 
-        return ms.ToArray();
+        short netId = (short)item.type;
+        if (item.Name == null)
+        {
+            netId = 0;
+        }
+
+        packetWriter.Write((short)item.stack);
+        packetWriter.Write(item.prefix);
+        packetWriter.Write(netId);
+
+        int positionAfter = (int)packetWriter.BaseStream.Position;
+
+        packetWriter.BaseStream.Position = position;
+        packetWriter.Write((ushort)positionAfter);
+        packetWriter.BaseStream.Position = positionAfter;
+
+        return memoryStream.ToArray();
     }
 }

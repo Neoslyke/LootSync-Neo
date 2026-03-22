@@ -10,8 +10,8 @@ public class Database
     private static readonly string DbPath = Path.Combine(TShock.SavePath, "LootSync.sqlite");
     private readonly string _connString = $"Data Source={DbPath}";
 
-    private readonly Dictionary<string, Dictionary<int, Chest>> _fakeChests = new();
-    private readonly HashSet<(int, int)> _playerPlacedChests = new();
+    private Dictionary<string, Dictionary<int, FakeChest>> _fakeChests = new();
+    private HashSet<(int, int)> _playerPlacedChests = new();
 
     public void Initialize()
     {
@@ -62,21 +62,22 @@ public class Database
 
                 var items = JsonConvert.DeserializeObject<List<ItemData>>(itemsJson) ?? new List<ItemData>();
 
-                var chest = new Chest { x = x, y = y };
-                for (int i = 0; i < items.Count && i < Chest.maxItems; i++)
+                var fakeChest = new FakeChest(x, y);
+
+                for (int i = 0; i < items.Count && i < fakeChest.item.Length; i++)
                 {
                     var data = items[i];
                     var item = new Item();
                     item.netDefaults(data.Id);
                     item.stack = data.Stack;
                     item.prefix = data.Prefix;
-                    chest.item[i] = item;
+                    fakeChest.item[i] = item;
                 }
 
                 if (!_fakeChests.ContainsKey(playerUuid))
-                    _fakeChests[playerUuid] = new Dictionary<int, Chest>();
+                    _fakeChests[playerUuid] = new Dictionary<int, FakeChest>();
 
-                _fakeChests[playerUuid][chestId] = chest;
+                _fakeChests[playerUuid][chestId] = fakeChest;
             }
         }
 
@@ -150,15 +151,15 @@ public class Database
         }
     }
 
-    public Chest GetOrCreateFakeChest(int chestId, string playerUuid)
+    public FakeChest GetOrCreateFakeChest(int chestId, string playerUuid)
     {
         if (!_fakeChests.ContainsKey(playerUuid))
-            _fakeChests[playerUuid] = new Dictionary<int, Chest>();
+            _fakeChests[playerUuid] = new Dictionary<int, FakeChest>();
 
         if (!_fakeChests[playerUuid].ContainsKey(chestId))
         {
             var realChest = Main.chest[chestId];
-            var fakeChest = new Chest { x = realChest.x, y = realChest.y };
+            var fakeChest = new FakeChest(realChest.x, realChest.y);
             realChest.item.CopyTo(fakeChest.item, 0);
             _fakeChests[playerUuid][chestId] = fakeChest;
         }

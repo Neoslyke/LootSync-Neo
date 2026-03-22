@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+<PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+  <OutputType>Library</OutputType>
+
+  <ImplicitUsings>enable</ImplicitUsings>
+  <Nullable>enable</Nullable>
+
+  <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+</PropertyGroup>
+
+<ItemGroup>
+  <PackageReference Include="TShock" Version="6.1.0" />
+</ItemGroup>
+
+</Project>
