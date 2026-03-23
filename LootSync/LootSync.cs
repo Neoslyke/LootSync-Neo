@@ -9,9 +9,9 @@ namespace LootSync;
 public class Plugin : TerrariaPlugin
 {
     public override string Name => "LootSync";
-    public override Version Version => new Version(2, 1, 0);
     public override string Author => "Neoslyke, Codian, matheus-fsc";
-    public override string Description => "Per-player loot chest inventories.";
+    public override Version Version => new Version(2, 1, 0);
+    public override string Description => "Player loot synchronization.";
 
     public static Configuration Config { get; private set; } = new();
     public static Database Database { get; private set; } = new();
