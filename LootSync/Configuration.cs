@@ -13,6 +13,9 @@ public class Configuration
     [JsonProperty("ShowLootMessage")]
     public bool ShowLootMessage { get; set; } = true;
 
+    [JsonProperty("ChestProtection")]
+    public bool ChestProtection { get; set; } = true;
+
     public static Configuration Load()
     {
         try

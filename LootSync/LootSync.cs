@@ -9,9 +9,9 @@ namespace LootSync;
 public class Plugin : TerrariaPlugin
 {
     public override string Name => "LootSync";
-    public override string Author => "Neoslyke, Codian, matheus-fsc";
     public override Version Version => new Version(2, 1, 0);
-    public override string Description => "Player loot synchronization.";
+    public override string Author => "Neoslyke, Codian, matheus-fsc";
+    public override string Description => "Per-player loot chest inventories.";
 
     public static Configuration Config { get; private set; } = new();
     public static Database Database { get; private set; } = new();
@@ -193,7 +193,19 @@ public class Plugin : TerrariaPlugin
         }
         else if (e.Flag == 1)
         {
-            Database.RemovePlayerPlacedChest(tileX, tileY);
+            bool isPlayerPlaced = Database.IsChestPlayerPlaced(tileX, tileY);
+
+            if (!isPlayerPlaced && Config.ChestProtection)
+            {
+                e.Player.SendErrorMessage("[LootSync] Loot chests cannot be destroyed! You are that greedy huh?");
+                e.Handled = true;
+                return;
+            }
+
+            if (isPlayerPlaced)
+            {
+                Database.RemovePlayerPlacedChest(tileX, tileY);
+            }
         }
     }
 
