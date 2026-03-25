@@ -52,8 +52,6 @@ namespace LootSync
             {
                 HelpText = "Reloads the configuration."
             });
-
-            TShock.Log.ConsoleInfo("[LootSync] Plugin loaded!");
         }
 
         protected override void Dispose(bool disposing)
