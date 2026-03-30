@@ -12,7 +12,7 @@ namespace LootSync
     {
         public override string Name => "LootSync";
         public override string Author => "Neoslyke, Codian, matheus-fsc";
-        public override Version Version => new Version(2, 1, 0);
+        public override Version Version => new Version(2, 1, 1);
         public override string Description => "Player loot synchronization.";
 
         public static Configuration Config { get; private set; } = new();
@@ -137,12 +137,18 @@ namespace LootSync
             if (Database.IsChestPlayerPlaced(realChest.x, realChest.y)) return;
 
             var item = new Item();
-            item.netDefaults(e.Type);
-            item.stack = e.Stacks;
-            item.prefix = e.Prefix;
+            if (e.Type > 0)
+            {
+                item.netDefaults(e.Type);
+                item.stack = e.Stacks;
+                item.prefix = e.Prefix;
+            }
 
             var fakeChest = Database.GetOrCreateFakeChest(e.ID, e.Player.UUID);
             fakeChest.item[e.Slot] = item;
+
+            byte[] payload = ConstructChestItemPacket(e.ID, e.Slot, item);
+            e.Player.SendRawData(payload);
 
             e.Handled = true;
         }
@@ -228,14 +234,19 @@ namespace LootSync
             packetWriter.Write((short)chestId);
             packetWriter.Write((byte)slot);
 
-            short netId = (short)item.type;
-            if (item.Name == null)
+            short stack = (short)(item?.stack ?? 0);
+            byte prefix = item?.prefix ?? 0;
+            short netId = (short)(item?.type ?? 0);
+
+            if (stack <= 0 || netId <= 0)
             {
+                stack = 0;
+                prefix = 0;
                 netId = 0;
             }
 
-            packetWriter.Write((short)item.stack);
-            packetWriter.Write(item.prefix);
+            packetWriter.Write(stack);
+            packetWriter.Write(prefix);
             packetWriter.Write(netId);
 
             int positionAfter = (int)packetWriter.BaseStream.Position;
